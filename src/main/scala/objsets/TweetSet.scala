@@ -50,7 +50,7 @@ abstract class TweetSet extends TweetSetInterface:
     * Question: Should we implement this method here, or should it remain
     * abstract and be implemented in the subclasses?
     */
-  def union(that: TweetSet): TweetSet 
+  def union(that: TweetSet): TweetSet
 
   /** Returns the tweet from this set which has the greatest retweet count.
     *
@@ -101,7 +101,7 @@ abstract class TweetSet extends TweetSetInterface:
 
   def size(set: TweetSet): Int = asSet(set).size
 
-class Empty extends TweetSet:
+case class Empty() extends TweetSet:
 
   override def union(that: TweetSet): TweetSet = that
 
@@ -119,10 +119,36 @@ class Empty extends TweetSet:
 
   def foreach(f: Tweet => Unit): Unit = ()
 
-class NonEmpty(elem: Tweet, left: TweetSet, right: TweetSet) extends TweetSet:
+case class NonEmpty(elem: Tweet, left: TweetSet, right: TweetSet)
+    extends TweetSet:
 
-  override def union(that: TweetSet): TweetSet = 
-    if size(that) == 0 then this else ???
+  override def union(that: TweetSet): TweetSet =
+    def test_R(x: TweetSet, acc: TweetSet): TweetSet = x match
+      case NonEmpty(elemThat: Tweet, left: TweetSet, right: TweetSet) =>
+        test_R(left, acc)
+        println(s"[TEST] => $elemThat")
+        val test: TweetSet = if acc.contains(elemThat) then {
+          println(s"$elemThat is in the set")
+          acc
+        } else {
+          println(s"$elemThat is not in the set")
+          acc.incl(elemThat)
+        }
+        println(s"[ACC] => $test")
+        println(s"[TEST] => $test")
+        test_R(right, test)
+        // Empty()
+        // test
+      case Empty() => acc
+
+    def inOrder_r(t: TweetSet): TweetSet = t match {
+      case NonEmpty(elem: Tweet, left: TweetSet, right: TweetSet) =>
+        inOrder_r(left)
+
+      case Empty() => this
+    }
+    val ref = this
+    if size(that) == 0 then ref else test_R(that, ref)
   def filterAcc(p: Tweet => Boolean, acc: TweetSet): TweetSet =
     val accumulated: TweetSet = if p(elem) then acc.incl(elem) else acc
     left.filterAcc(p, accumulated)
