@@ -126,27 +126,12 @@ case class NonEmpty(elem: Tweet, left: TweetSet, right: TweetSet)
     def test_R(x: TweetSet, acc: TweetSet): TweetSet = x match
       case NonEmpty(elemThat: Tweet, left: TweetSet, right: TweetSet) =>
         test_R(left, acc)
-        println(s"[TEST] => $elemThat")
-        val test: TweetSet = if acc.contains(elemThat) then {
-          println(s"$elemThat is in the set")
-          acc
-        } else {
-          println(s"$elemThat is not in the set")
-          acc.incl(elemThat)
-        }
-        println(s"[ACC] => $test")
-        println(s"[TEST] => $test")
-        test_R(right, test)
-        // Empty()
-        // test
+        test_R(
+          right,
+          if acc.contains(elemThat) then acc else acc.incl(elemThat)
+        )
       case Empty() => acc
 
-    def inOrder_r(t: TweetSet): TweetSet = t match {
-      case NonEmpty(elem: Tweet, left: TweetSet, right: TweetSet) =>
-        inOrder_r(left)
-
-      case Empty() => this
-    }
     val ref = this
     if size(that) == 0 then ref else test_R(that, ref)
   def filterAcc(p: Tweet => Boolean, acc: TweetSet): TweetSet =
