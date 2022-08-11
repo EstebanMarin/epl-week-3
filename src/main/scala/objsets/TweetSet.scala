@@ -134,19 +134,28 @@ case class NonEmpty(elem: Tweet, left: TweetSet, right: TweetSet)
       case Empty() => acc
     tThis(this, Tweet("x", "x", Int.MinValue))
 
-  override def descendingByRetweet: TweetList = ???
+  override def descendingByRetweet: TweetList =
+    def handler(element: Tweet, acc: TweetList): Boolean = ???
+
+    def tThis(x: TweetSet, acc: TweetList): TweetList = x match
+      case NonEmpty(element, left, righ) =>
+        tThis(left, acc)
+        tThis(right, if handler(element, acc) then acc else acc)
+      case Empty() => acc
+    tThis(this, Nil)
+
   override def union(that: TweetSet): TweetSet =
-    def test_R(x: TweetSet, acc: TweetSet): TweetSet = x match
+    def tThat(x: TweetSet, acc: TweetSet): TweetSet = x match
       case NonEmpty(elemThat: Tweet, left: TweetSet, right: TweetSet) =>
-        test_R(left, acc)
-        test_R(
+        tThat(left, acc)
+        tThat(
           right,
           if acc.contains(elemThat) then acc else acc.incl(elemThat)
         )
       case Empty() => acc
 
     val ref = this
-    if size(that) == 0 then ref else test_R(that, ref)
+    if size(that) == 0 then ref else tThat(that, ref)
   def filterAcc(p: Tweet => Boolean, acc: TweetSet): TweetSet =
     val accumulated: TweetSet = if p(elem) then acc.incl(elem) else acc
     left.filterAcc(p, accumulated)
