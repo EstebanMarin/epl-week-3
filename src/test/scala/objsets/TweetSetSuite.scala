@@ -38,10 +38,10 @@ class TweetSetSuite extends munit.FunSuite:
   //     assertEquals(size(set4c.union(set4d)), 4)
   // }
 
-  // test("union: with empty set1") {
-  //   new TestSets:
-  //     assertEquals(size(set5.union(set1)), 4)
-  // }
+  test("union: with empty set1") {
+    new TestSets:
+      assertEquals(size(set5.union(set1)), 4)
+  }
 
   test("union: with empty set2") {
     new TestSets:

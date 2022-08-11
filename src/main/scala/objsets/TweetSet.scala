@@ -50,7 +50,7 @@ abstract class TweetSet extends TweetSetInterface:
     * Question: Should we implement this method here, or should it remain
     * abstract and be implemented in the subclasses?
     */
-  def union(that: TweetSet): TweetSet
+  def union(that: TweetSet): TweetSet 
 
   /** Returns the tweet from this set which has the greatest retweet count.
     *
@@ -94,6 +94,13 @@ abstract class TweetSet extends TweetSetInterface:
     */
   def foreach(f: Tweet => Unit): Unit
 
+  def asSet(tweets: TweetSet): Set[Tweet] =
+    var res = Set[Tweet]()
+    tweets.foreach(res += _)
+    res
+
+  def size(set: TweetSet): Int = asSet(set).size
+
 class Empty extends TweetSet:
 
   override def union(that: TweetSet): TweetSet = that
@@ -114,9 +121,8 @@ class Empty extends TweetSet:
 
 class NonEmpty(elem: Tweet, left: TweetSet, right: TweetSet) extends TweetSet:
 
-  override def union(that: TweetSet): TweetSet =
-    if that == Empty() then this else ???
-
+  override def union(that: TweetSet): TweetSet = 
+    if size(that) == 0 then this else ???
   def filterAcc(p: Tweet => Boolean, acc: TweetSet): TweetSet =
     val accumulated: TweetSet = if p(elem) then acc.incl(elem) else acc
     left.filterAcc(p, accumulated)
