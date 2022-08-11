@@ -60,7 +60,7 @@ abstract class TweetSet extends TweetSetInterface:
     * Question: Should we implement this method here, or should it remain
     * abstract and be implemented in the subclasses?
     */
-  def mostRetweeted: Tweet = ???
+  def mostRetweeted: Tweet
 
   /** Returns a list containing all tweets of this set, sorted by retweet count
     * in descending order. In other words, the head of the resulting list should
@@ -70,7 +70,7 @@ abstract class TweetSet extends TweetSetInterface:
     * Should we implement this method here, or should it remain abstract and be
     * implemented in the subclasses?
     */
-  def descendingByRetweet: TweetList = ???
+  def descendingByRetweet: TweetList
 
   /** The following methods are already implemented
     */
@@ -103,6 +103,10 @@ abstract class TweetSet extends TweetSetInterface:
 
 case class Empty() extends TweetSet:
 
+  override def mostRetweeted: Tweet =
+    throw new NoSuchElementException
+  override def descendingByRetweet: TweetList = ???
+
   override def union(that: TweetSet): TweetSet = that
 
   def filterAcc(p: Tweet => Boolean, acc: TweetSet): TweetSet =
@@ -122,6 +126,15 @@ case class Empty() extends TweetSet:
 case class NonEmpty(elem: Tweet, left: TweetSet, right: TweetSet)
     extends TweetSet:
 
+  override def mostRetweeted: Tweet =
+    def tThis(x: TweetSet, acc: Tweet): Tweet = x match
+      case NonEmpty(elemT: Tweet, left: TweetSet, right: TweetSet) =>
+        tThis(left, acc)
+        tThis(right, if elemT.retweets > acc.retweets then elem else acc)
+      case Empty() => acc
+    tThis(this, Tweet("x", "x", Int.MinValue))
+
+  override def descendingByRetweet: TweetList = ???
   override def union(that: TweetSet): TweetSet =
     def test_R(x: TweetSet, acc: TweetSet): TweetSet = x match
       case NonEmpty(elemThat: Tweet, left: TweetSet, right: TweetSet) =>
