@@ -105,7 +105,8 @@ case class Empty() extends TweetSet:
 
   override def mostRetweeted: Tweet =
     throw new NoSuchElementException
-  override def descendingByRetweet: TweetList = ???
+  override def descendingByRetweet: TweetList =
+    throw new NoSuchElementException
 
   override def union(that: TweetSet): TweetSet = that
 
@@ -135,14 +136,19 @@ case class NonEmpty(elem: Tweet, left: TweetSet, right: TweetSet)
     tThis(this, Tweet("x", "x", Int.MinValue))
 
   override def descendingByRetweet: TweetList =
-    def handler(element: Tweet, acc: TweetList): Boolean = ???
+    def handler(element: Tweet, acc: List[Tweet]): List[Tweet] =
+      println(s"[handler function] $element and ${acc :+ element}")
+      (acc :+ element)
 
-    def tThis(x: TweetSet, acc: TweetList): TweetList = x match
+    def tThisT(x: TweetSet, acc: List[Tweet]): List[Tweet] = x match
       case NonEmpty(element, left, righ) =>
-        tThis(left, acc)
-        tThis(right, if handler(element, acc) then acc else acc)
+        tThisT(left, acc)
+        println(s"[tThisT] => $element")
+        tThisT(right, handler(element, acc))
       case Empty() => acc
-    tThis(this, Nil)
+    val test = tThisT(this, List.empty)
+    Cons(Tweet("a", "a body", 70), Nil)
+
 
   override def union(that: TweetSet): TweetSet =
     def tThat(x: TweetSet, acc: TweetSet): TweetSet = x match
@@ -198,7 +204,7 @@ object Nil extends TweetList:
   def tail = throw java.util.NoSuchElementException("tail of EmptyList")
   def isEmpty = true
 
-class Cons(val head: Tweet, val tail: TweetList) extends TweetList:
+case class Cons(val head: Tweet, val tail: TweetList) extends TweetList:
   def isEmpty = false
 
 object GoogleVsApple:

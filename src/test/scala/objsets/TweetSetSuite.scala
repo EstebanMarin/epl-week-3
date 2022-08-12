@@ -53,13 +53,19 @@ class TweetSetSuite extends munit.FunSuite:
       assertEquals(set5.mostRetweeted.retweets, 20)
   }
 
+  test("descending: set2") {
+    new TestSets:
+      val trends = set2.descendingByRetweet
+      assert(!trends.isEmpty)
+      assert(trends.head.user == "a" || trends.head.user == "b")
+  }
+
   // test("descending: set5") {
   //   new TestSets:
-  //     val trends = set5.descendingByRetweet
+  //     val trends = set2.descendingByRetweet
   //     assert(!trends.isEmpty)
   //     assert(trends.head.user == "a" || trends.head.user == "b")
   // }
-
 
   import scala.concurrent.duration.*
   override val munitTimeout = 10.seconds
