@@ -127,27 +127,30 @@ case class Empty() extends TweetSet:
 case class NonEmpty(elem: Tweet, left: TweetSet, right: TweetSet)
     extends TweetSet:
 
-  override def mostRetweeted: Tweet =
-    def tThis(x: TweetSet, acc: Tweet): Tweet = x match
-      case NonEmpty(elemT: Tweet, left: TweetSet, right: TweetSet) =>
-        tThis(left, acc)
-        tThis(right, if elemT.retweets > acc.retweets then elem else acc)
+  override def mostRetweeted: Tweet = 
+    def mrT(tweetSet: TweetSet, acc: Tweet): Tweet = tweetSet match
+      case NonEmpty(elem: Tweet, left: TweetSet, right: TweetSet) =>
+        mrT(tweetSet.remove(elem), if elem.retweets > acc.retweets then elem else acc)
       case Empty() => acc
-    tThis(this, Tweet("x", "x", Int.MinValue))
-
+    mrT(left.union(right), Tweet("x", "x", Int.MinValue)) 
+    
   override def descendingByRetweet: TweetList =
-    def handler(element: Tweet, acc: List[Tweet]): List[Tweet] =
-      println(s"[handler function] $element and ${acc :+ element}")
-      (acc :+ element)
+    def recSet(tweetSet: TweetSet, acc: TweetList): TweetList =  ???
+    recSet(left.union(right), Nil)
 
-    def tThisT(x: TweetSet, acc: List[Tweet]): List[Tweet] = x match
-      case NonEmpty(element, left, righ) =>
-        tThisT(left, acc)
-        println(s"[tThisT] => $element")
-        tThisT(right, handler(element, acc))
-      case Empty() => acc
-    val test = tThisT(this, List.empty)
-    Cons(Tweet("a", "a body", 70), Nil)
+
+    // def handler(element: Tweet, acc: List[Tweet]): List[Tweet] =
+    //   println(s"[handler function] $element and ${acc :+ element}")
+    //   (acc :+ element)
+
+    // def tThisT(x: TweetSet, acc: List[Tweet]): List[Tweet] = x match
+    //   case NonEmpty(element, left, righ) =>
+    //     tThisT(left, acc)
+    //     // println(s"[tThisT] => $element")
+    //     tThisT(right, handler(element, acc))
+    //   case Empty() => acc
+    // val test = tThisT(this, List.empty)
+    // Cons(Tweet("a", "a body", 70), Nil)
 
 
   override def union(that: TweetSet): TweetSet =
