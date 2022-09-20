@@ -127,17 +127,23 @@ case class Empty() extends TweetSet:
 case class NonEmpty(elem: Tweet, left: TweetSet, right: TweetSet)
     extends TweetSet:
 
-  override def mostRetweeted: Tweet = 
+  override def mostRetweeted: Tweet =
     def mrT(tweetSet: TweetSet, acc: Tweet): Tweet = tweetSet match
-      case NonEmpty(elem: Tweet, left: TweetSet, right: TweetSet) =>
-        mrT(tweetSet.remove(elem), if elem.retweets > acc.retweets then elem else acc)
+      case NonEmpty(elem: Tweet, _, _) =>
+        mrT(
+          tweetSet.remove(elem),
+          if elem.retweets > acc.retweets then elem else acc
+        )
       case Empty() => acc
-    mrT(left.union(right), Tweet("x", "x", Int.MinValue)) 
-    
-  override def descendingByRetweet: TweetList =
-    def recSet(tweetSet: TweetSet, acc: TweetList): TweetList =  ???
-    recSet(left.union(right), Nil)
+    mrT(left.union(right).incl(elem), Tweet("x", "x", Int.MinValue))
 
+  override def descendingByRetweet: TweetList =
+    def recSet(tweetSet: TweetSet, acc: TweetList): TweetList = tweetSet match
+      case NonEmpty(elem: Tweet, _, _) =>
+        val mr = tweetSet.mostRetweeted
+        recSet(tweetSet.remove(mr), Cons(mr, acc))
+      case Empty() => acc
+    recSet(left.union(right).incl(elem), Nil)
 
     // def handler(element: Tweet, acc: List[Tweet]): List[Tweet] =
     //   println(s"[handler function] $element and ${acc :+ element}")
@@ -151,7 +157,6 @@ case class NonEmpty(elem: Tweet, left: TweetSet, right: TweetSet)
     //   case Empty() => acc
     // val test = tThisT(this, List.empty)
     // Cons(Tweet("a", "a body", 70), Nil)
-
 
   override def union(that: TweetSet): TweetSet =
     def tThat(x: TweetSet, acc: TweetSet): TweetSet = x match

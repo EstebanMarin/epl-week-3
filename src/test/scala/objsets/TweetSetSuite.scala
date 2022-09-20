@@ -70,8 +70,9 @@ class TweetSetSuite extends munit.FunSuite:
   test("descending: set6") {
     new TestSets:
       val trends = set6.descendingByRetweet
+      println(trends)
       assert(!trends.isEmpty)
-      assert(trends.head.user == "d")
+      assert(trends.head.user == "c")
   }
 
   import scala.concurrent.duration.*
