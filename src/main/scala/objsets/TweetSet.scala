@@ -1,6 +1,7 @@
 package objsets
 
 import TweetReader.*
+import scala.annotation.tailrec
 
 /** A class to represent tweets.
   */
@@ -108,7 +109,7 @@ case class Empty() extends TweetSet:
   override def descendingByRetweet: TweetList =
     throw new NoSuchElementException
 
-  override def lessRetweeted: Tweet = 
+  override def lessRetweeted: Tweet =
     throw new NoSuchElementException
 
   override def ascendingByRetweet: TweetList =
@@ -134,7 +135,7 @@ case class NonEmpty(elem: Tweet, left: TweetSet, right: TweetSet)
     extends TweetSet:
 
   override def mostRetweeted: Tweet =
-    def mrT(tweetSet: TweetSet, acc: Tweet): Tweet = tweetSet match
+    @tailrec def mrT(tweetSet: TweetSet, acc: Tweet): Tweet = tweetSet match
       case NonEmpty(elem: Tweet, _, _) =>
         mrT(
           tweetSet.remove(elem),
@@ -144,15 +145,16 @@ case class NonEmpty(elem: Tweet, left: TweetSet, right: TweetSet)
     mrT(left.union(right).incl(elem), Tweet("x", "x", Int.MinValue))
 
   override def descendingByRetweet: TweetList =
-    def recSet(tweetSet: TweetSet, acc: TweetList): TweetList = tweetSet match
-      case NonEmpty(_, _, _) =>
-        val mr = tweetSet.mostRetweeted
-        recSet(tweetSet.remove(mr), Cons(mr, acc))
-      case Empty() => acc
+    @tailrec def recSet(tweetSet: TweetSet, acc: TweetList): TweetList =
+      tweetSet match
+        case NonEmpty(_, _, _) =>
+          val mr = tweetSet.mostRetweeted
+          recSet(tweetSet.remove(mr), Cons(mr, acc))
+        case Empty() => acc
     recSet(left.union(right).incl(elem), Nil)
 
   override def lessRetweeted: Tweet =
-    def mrT(tweetSet: TweetSet, acc: Tweet): Tweet = tweetSet match
+    @tailrec def mrT(tweetSet: TweetSet, acc: Tweet): Tweet = tweetSet match
       case NonEmpty(elem: Tweet, _, _) =>
         mrT(
           tweetSet.remove(elem),
@@ -162,11 +164,12 @@ case class NonEmpty(elem: Tweet, left: TweetSet, right: TweetSet)
     mrT(left.union(right).incl(elem), Tweet("x", "x", Int.MaxValue))
 
   def ascendingByRetweet: TweetList =
-    def recSet(tweetSet: TweetSet, acc: TweetList): TweetList = tweetSet match
-      case NonEmpty(_, _, _) =>
-        val mr = tweetSet.lessRetweeted
-        recSet(tweetSet.remove(mr), Cons(mr, acc))
-      case Empty() => acc
+    @tailrec def recSet(tweetSet: TweetSet, acc: TweetList): TweetList =
+      tweetSet match
+        case NonEmpty(_, _, _) =>
+          val mr = tweetSet.lessRetweeted
+          recSet(tweetSet.remove(mr), Cons(mr, acc))
+        case Empty() => acc
     recSet(left.union(right).incl(elem), Nil)
 
   override def union(that: TweetSet): TweetSet =
@@ -230,13 +233,24 @@ object GoogleVsApple:
   val google = List("android", "Android", "galaxy", "Galaxy", "nexus", "Nexus")
   val apple = List("ios", "iOS", "iphone", "iPhone", "ipad", "iPad")
 
-  lazy val googleTweets: TweetSet = ???
-  lazy val appleTweets: TweetSet = ???
+  val setRecentTweets: TweetSet = TweetReader.allTweets
+
+  private def trendChecker(elem: Tweet, strings: List[String]): Boolean = ???
+
+  def recSet(setTweets: TweetSet, acc: TweetSet, list: List[String]): TweetSet =
+    setTweets match
+      case NonEmpty(elem: Tweet, r: TweetSet, l: TweetSet) =>
+        if trendChecker(elem, list) then acc.incl(elem) else acc
+      case Empty() => acc
+
+  lazy val googleTweets: TweetSet = recSet(setRecentTweets, Empty(), google)
+  lazy val appleTweets: TweetSet = recSet(setRecentTweets, Empty(), apple)
 
   /** A list of all tweets mentioning a keyword from either apple or google,
     * sorted by the number of retweets.
     */
-  lazy val trending: TweetList = ???
+  lazy val trending: TweetList =
+    (googleTweets.union(appleTweets)).descendingByRetweet
 
 object Main extends App:
   // Print the trending tweets

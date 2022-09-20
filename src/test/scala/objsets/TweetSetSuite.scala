@@ -80,7 +80,16 @@ class TweetSetSuite extends munit.FunSuite:
   test("ascending: set6") {
     new TestSets:
       val trends = set6.ascendingByRetweet
-      println(trends)
+      // println(trends)
+      assert(!trends.isEmpty)
+      assert(trends.head.user == "d")
+  }
+
+  test("googleTweets") {
+    new TestSets:
+      val test = TweetReader.allTweets
+      val trends = set6.ascendingByRetweet
+      // println(trends)
       assert(!trends.isEmpty)
       assert(trends.head.user == "d")
   }
