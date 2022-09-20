@@ -12,3 +12,5 @@ trait TweetSetInterface:
   def union(that: TweetSet): TweetSet
   def mostRetweeted: Tweet
   def descendingByRetweet: TweetList
+  def lessRetweeted: Tweet
+  def ascendingByRetweet: TweetList

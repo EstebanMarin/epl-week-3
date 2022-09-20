@@ -108,6 +108,12 @@ case class Empty() extends TweetSet:
   override def descendingByRetweet: TweetList =
     throw new NoSuchElementException
 
+  override def lessRetweeted: Tweet = 
+    throw new NoSuchElementException
+
+  override def ascendingByRetweet: TweetList =
+    throw new NoSuchElementException
+
   override def union(that: TweetSet): TweetSet = that
 
   def filterAcc(p: Tweet => Boolean, acc: TweetSet): TweetSet =
@@ -139,24 +145,29 @@ case class NonEmpty(elem: Tweet, left: TweetSet, right: TweetSet)
 
   override def descendingByRetweet: TweetList =
     def recSet(tweetSet: TweetSet, acc: TweetList): TweetList = tweetSet match
-      case NonEmpty(elem: Tweet, _, _) =>
+      case NonEmpty(_, _, _) =>
         val mr = tweetSet.mostRetweeted
         recSet(tweetSet.remove(mr), Cons(mr, acc))
       case Empty() => acc
     recSet(left.union(right).incl(elem), Nil)
 
-    // def handler(element: Tweet, acc: List[Tweet]): List[Tweet] =
-    //   println(s"[handler function] $element and ${acc :+ element}")
-    //   (acc :+ element)
+  override def lessRetweeted: Tweet =
+    def mrT(tweetSet: TweetSet, acc: Tweet): Tweet = tweetSet match
+      case NonEmpty(elem: Tweet, _, _) =>
+        mrT(
+          tweetSet.remove(elem),
+          if elem.retweets < acc.retweets then elem else acc
+        )
+      case Empty() => acc
+    mrT(left.union(right).incl(elem), Tweet("x", "x", Int.MaxValue))
 
-    // def tThisT(x: TweetSet, acc: List[Tweet]): List[Tweet] = x match
-    //   case NonEmpty(element, left, righ) =>
-    //     tThisT(left, acc)
-    //     // println(s"[tThisT] => $element")
-    //     tThisT(right, handler(element, acc))
-    //   case Empty() => acc
-    // val test = tThisT(this, List.empty)
-    // Cons(Tweet("a", "a body", 70), Nil)
+  def ascendingByRetweet: TweetList =
+    def recSet(tweetSet: TweetSet, acc: TweetList): TweetList = tweetSet match
+      case NonEmpty(_, _, _) =>
+        val mr = tweetSet.lessRetweeted
+        recSet(tweetSet.remove(mr), Cons(mr, acc))
+      case Empty() => acc
+    recSet(left.union(right).incl(elem), Nil)
 
   override def union(that: TweetSet): TweetSet =
     def tThat(x: TweetSet, acc: TweetSet): TweetSet = x match

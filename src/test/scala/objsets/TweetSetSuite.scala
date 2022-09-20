@@ -67,12 +67,22 @@ class TweetSetSuite extends munit.FunSuite:
       assert(trends.head.user == "a" || trends.head.user == "b")
   }
 
+  // not sure abuot the ordering here but implemented as described in the coursera course
   test("descending: set6") {
     new TestSets:
       val trends = set6.descendingByRetweet
-      println(trends)
+      // println(trends)
       assert(!trends.isEmpty)
       assert(trends.head.user == "c")
+  }
+
+
+  test("ascending: set6") {
+    new TestSets:
+      val trends = set6.ascendingByRetweet
+      println(trends)
+      assert(!trends.isEmpty)
+      assert(trends.head.user == "d")
   }
 
   import scala.concurrent.duration.*
