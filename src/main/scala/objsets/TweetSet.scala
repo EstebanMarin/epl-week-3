@@ -235,7 +235,8 @@ object GoogleVsApple:
 
   val setRecentTweets: TweetSet = TweetReader.allTweets
 
-  private def trendChecker(elem: Tweet, strings: List[String]): Boolean = ???
+  private def trendChecker(elem: Tweet, strings: List[String]): Boolean =
+    strings.filter(elem.text contains _).isEmpty
 
   def recSet(setTweets: TweetSet, acc: TweetSet, list: List[String]): TweetSet =
     setTweets match
